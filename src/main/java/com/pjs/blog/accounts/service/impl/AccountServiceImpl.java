@@ -13,8 +13,8 @@ import com.pjs.blog.config.security.jjwt.JwtFilter;
 import com.pjs.blog.config.security.jjwt.TokenManager;
 import com.pjs.blog.config.security.jjwt.TokenType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,8 +34,6 @@ import org.springframework.validation.Errors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import java.time.LocalDateTime;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Service
@@ -48,6 +46,8 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     private final TokenManager tokenManager;
     private final RedisUtil redisUtil;
     private final PasswordEncoder passwordEncoder;
+
+
 
 
 
@@ -104,5 +104,9 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         });
         account.passwordSetter(this.passwordEncoder.encode(account.getPassword()));
         return accountJapRepository.save(account);
+    }
+
+    public Page<Account> getAllUser(Pageable pageable) {
+        return accountJapRepository.findAll(pageable);
     }
 }
