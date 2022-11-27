@@ -2,10 +2,7 @@ package com.pjs.blog.accounts.dto;
 
 import com.pjs.blog.accounts.entity.Account;
 import com.pjs.blog.accounts.entity.AccountRole;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 
@@ -16,6 +13,7 @@ import java.util.Set;
 
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountDto {
@@ -34,6 +32,7 @@ public class AccountDto {
     private Set<AccountRole> roles;
 
     private LocalDateTime joinDate;
+
 
     public Account toEntity() {
         modelMapper.getConfiguration()

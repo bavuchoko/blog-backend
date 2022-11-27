@@ -33,5 +33,11 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private Set<AccountRole> roles;
 
+    public void passwordSetter(String password) {
+        this.password = password;
+    }
 
+    public void joinDateSetter() {
+        this.joinDate = LocalDateTime.now();
+    }
 }

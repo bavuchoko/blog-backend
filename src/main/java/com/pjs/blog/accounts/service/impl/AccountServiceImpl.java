@@ -1,6 +1,7 @@
 package com.pjs.blog.accounts.service.impl;
 
 import com.pjs.blog.accounts.AccountAdapter;
+import com.pjs.blog.accounts.dto.AccountDto;
 import com.pjs.blog.accounts.dto.LoginResponseBody;
 import com.pjs.blog.accounts.entity.Account;
 import com.pjs.blog.accounts.repository.AccountJapRepository;
@@ -26,11 +27,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+
+import java.time.LocalDateTime;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -43,9 +47,8 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenManager tokenManager;
     private final RedisUtil redisUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    @Value("${spring.jwt.token-validity-in-seconds}")
-    private long onDayAsMilliseconds;
 
 
     @Override
@@ -55,13 +58,14 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return new AccountAdapter(account);
     }
 
-    public ResponseEntity authrize(
-            String username,
-            String pass,
-            HttpServletResponse response) throws BadCredentialsException {
+    public ResponseEntity authorize(
+            AccountDto accountDto,
+            HttpServletResponse response,
+            String message
+    ) throws BadCredentialsException {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, pass);
+                new UsernamePasswordAuthenticationToken(accountDto.getUsername(), accountDto.getPassword());
 
         Authentication authentication = authenticationManagerBuilder.getObject()
                 .authenticate(authenticationToken);
@@ -74,7 +78,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
                 .token(accessToken)
                 .username(authentication.getName())
                 .nickname(tokenManager.getNickname(accessToken)==null ? "익명" : tokenManager.getNickname(accessToken))
-                .message("로그인에 성공하였습니다.")
+                .message( message + "에 성공하였습니다.")
                 .build();
         String refreshToken = tokenManager.createToken(authentication, TokenType.REFRESH_TOKEN);
         redisUtil.setData(authentication.getName(), refreshToken);
@@ -89,5 +93,16 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     public ResponseEntity<EntityModel<Errors>> badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(EntityModel.of(errors).add(linkTo(AccountController.class).slash("/join").withRel("redirect")));
+    }
+
+    public Account saveAccount(AccountDto accountDto) {
+
+        Account account = accountDto.toEntity();
+        account.joinDateSetter();
+        accountJapRepository.findByUsername(account.getUsername()).ifPresent(e->{
+            throw new IllegalStateException("이미 가입된 이메일 입니다.");
+        });
+        account.passwordSetter(this.passwordEncoder.encode(account.getPassword()));
+        return accountJapRepository.save(account);
     }
 }

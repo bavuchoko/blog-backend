@@ -14,4 +14,9 @@ public class LoginResponseBody {
     private String nickname;
     private String message;
 
+
+    public LoginResponseBody(String message) {
+        this.success = "fail";
+        this.message = message;
+    }
 }

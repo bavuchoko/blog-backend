@@ -34,13 +34,13 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
     private Key key;
 
     public TokenManagerImpl(
-            @Value("{spring.jwt.secret}") String secret,
-            @Value("{spring.jwt.token-validity-in-millisecond}") long tokenValidityInSeconds ){
+            @Value("${spring.jwt.secret}") String secret,
+            @Value("${spring.jwt.token-validity-in-millisecond}") long oneDayInMilliseconds ){
         this.secret = secret;
 //        24시간
-        this.accessTokenValidityTime = tokenValidityInSeconds;
+        this.accessTokenValidityTime = oneDayInMilliseconds;
 //        1주일
-        this.refreshTokenValidityTime = tokenValidityInSeconds * 7 ;
+        this.refreshTokenValidityTime = oneDayInMilliseconds * 7 ;
     }
 
     public void afterPropertiesSet() {
