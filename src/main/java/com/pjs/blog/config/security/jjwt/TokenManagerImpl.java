@@ -1,6 +1,7 @@
 package com.pjs.blog.config.security.jjwt;
 
 import com.pjs.blog.accounts.AccountAdapter;
+import com.pjs.blog.accounts.entity.Account;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -58,6 +59,8 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
             //닉네임
+
+        AccountAdapter account25 = (AccountAdapter)(authentication.getPrincipal());
         String nickName = ((AccountAdapter)(authentication.getPrincipal())).getAccount().getNickname();
 
         //접속가능시간, 갱신가능시간세팅

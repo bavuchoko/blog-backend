@@ -15,6 +15,7 @@ public class AccountAdapter extends User {
 
     public AccountAdapter(Account account) {
         super(account.getUsername(), account.getPassword(), authrities(account.getRoles()));
+        this.account =account;
     }
 
     private static Collection<? extends GrantedAuthority> authrities(Set<AccountRole> roles) {
