@@ -1,5 +1,6 @@
 package com.pjs.blog.accounts.web;
 
+import com.pjs.blog.accounts.CurrentUser;
 import com.pjs.blog.accounts.dto.AccountDto;
 import com.pjs.blog.accounts.dto.LoginResponseBody;
 import com.pjs.blog.accounts.entity.Account;
@@ -19,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -69,6 +71,15 @@ public class AccountController {
         }
 
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity logoutUser(
+            HttpServletRequest request,
+            @CurrentUser Account account) {
+            accountService.logoutUser(account, request);
+            return ResponseEntity.ok().body("logged out");
+    }
+
 
     @GetMapping("/usertest")
     @PreAuthorize("hasAnyRole('USER')")

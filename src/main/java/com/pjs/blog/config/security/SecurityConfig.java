@@ -2,6 +2,7 @@ package com.pjs.blog.config.security;
 
 import com.pjs.blog.accounts.service.impl.AccountServiceImpl;
 
+import com.pjs.blog.config.redis.RedisUtil;
 import com.pjs.blog.config.security.jjwt.JwtSecurityConfig;
 import com.pjs.blog.config.security.jjwt.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,13 @@ public class SecurityConfig {
     private final TokenManager tokenManager;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final RedisUtil redisUtil;
 
-    public SecurityConfig(TokenManager tokenManager, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+    public SecurityConfig(TokenManager tokenManager, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler, RedisUtil redisUtil) {
         this.tokenManager = tokenManager;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.redisUtil = redisUtil;
     }
 
     @Autowired
@@ -87,7 +90,7 @@ public class SecurityConfig {
                 .antMatchers("/admin/*").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
-                .apply(new JwtSecurityConfig(tokenManager))
+                .apply(new JwtSecurityConfig(tokenManager,redisUtil))
 
                 .and().build();
     }

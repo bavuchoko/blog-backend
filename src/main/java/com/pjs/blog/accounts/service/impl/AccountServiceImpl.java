@@ -12,6 +12,8 @@ import com.pjs.blog.config.redis.RedisUtil;
 import com.pjs.blog.config.security.jjwt.JwtFilter;
 import com.pjs.blog.config.security.jjwt.TokenManager;
 import com.pjs.blog.config.security.jjwt.TokenType;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +34,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -47,7 +54,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     private final RedisUtil redisUtil;
     private final PasswordEncoder passwordEncoder;
 
-
+    private final String BLOCK_ACCESS_TOKEN_PREFIX = "LOGOUT:";
 
 
 
@@ -58,6 +65,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return new AccountAdapter(account);
     }
 
+    @Override
     public ResponseEntity authorize(
             AccountDto accountDto,
             HttpServletResponse response,
@@ -95,6 +103,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return ResponseEntity.badRequest().body(EntityModel.of(errors).add(linkTo(AccountController.class).slash("/join").withRel("redirect")));
     }
 
+    @Override
     public Account saveAccount(AccountDto accountDto) {
 
         Account account = accountDto.toEntity();
@@ -106,7 +115,24 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return accountJapRepository.save(account);
     }
 
+    @Override
     public Page<Account> getAllUser(Pageable pageable) {
         return accountJapRepository.findAll(pageable);
+    }
+
+    @Override
+    public void logoutUser(Account accout, HttpServletRequest request) {
+        try{
+            String accessToken = tokenManager.resolveToken(request);
+            //토큰만료시간을 가져와서 Date 타입의 만료시간을 long 타입으로 변환해 redis 의 유효기간으로 넣어줌.
+            Date expiration = tokenManager.getClaims(accessToken).getExpiration();
+            SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy.MM.dd/HH:mm:ss");
+            long expiredAt = (df.parse(df.format(expiration))).getTime();
+            redisUtil.setDataExpire(BLOCK_ACCESS_TOKEN_PREFIX + accessToken, accout.getUsername(),expiredAt);
+            SecurityContextHolder.clearContext();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 }

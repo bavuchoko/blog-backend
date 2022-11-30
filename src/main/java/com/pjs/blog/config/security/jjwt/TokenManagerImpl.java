@@ -2,28 +2,34 @@ package com.pjs.blog.config.security.jjwt;
 
 import com.pjs.blog.accounts.AccountAdapter;
 import com.pjs.blog.accounts.entity.Account;
+import com.pjs.blog.accounts.repository.AccountJapRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Component
 public class TokenManagerImpl implements TokenManager, InitializingBean {
 
+    public static final String AUTHORIZATION_HEADER = "Authorization";
     private final Logger logger = LoggerFactory.getLogger(TokenManagerImpl.class);
 
     private static final String AUTHORITIES_KEY = "auth";
@@ -33,6 +39,8 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
     private final long refreshTokenValidityTime;
 
     private Key key;
+    @Autowired
+    AccountJapRepository accountJapRepository;
 
     public TokenManagerImpl(
             @Value("${spring.jwt.secret}") String secret,
@@ -93,7 +101,7 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
     }
 
     @Override
-    public boolean validateToken(String token, HttpServletRequest request) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
@@ -125,16 +133,50 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
 
     @Override
     public Authentication getAuthentication(String token) {
-        return null;
+        Claims claims = Jwts
+                .parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+        String username = claims.get("username", String.class);
+        UserDetails aa=  new AccountAdapter(accountJapRepository.findByUsername(username)
+                .orElseThrow(()->new UsernameNotFoundException(username)));
+
+        return new UsernamePasswordAuthenticationToken(aa, token, authorities);
     }
 
     @Override
-    public String getUsername(String accessToken) {
-        return null;
+    public Claims getClaims(String accessToken) {
+      return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(accessToken)
+                .getBody();
+    }
+
+
+
+    public String getUsername(String token) {
+        return getClaims(token).get("username").toString();
+    }
+
+    public String getNickname(String token) {
+        return getClaims(token).get("nickname").toString();
     }
 
     @Override
-    public String getNickname(String accessToken) {
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
         return null;
     }
+
+
 }
