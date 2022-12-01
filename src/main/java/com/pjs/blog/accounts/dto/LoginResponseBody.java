@@ -8,15 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponseBody {
-    private String success;
+    private String success ="fail";
     private String token;
     private String username;
     private String nickname;
     private String message;
 
 
-    public LoginResponseBody(String message) {
-        this.success = "fail";
-        this.message = message;
-    }
 }

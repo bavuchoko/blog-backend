@@ -6,6 +6,7 @@ import com.pjs.blog.accounts.dto.LoginResponseBody;
 import com.pjs.blog.accounts.entity.Account;
 import com.pjs.blog.accounts.entity.AccountRole;
 import com.pjs.blog.accounts.service.impl.AccountServiceImpl;
+import com.pjs.blog.config.security.jjwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,17 +14,18 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -46,10 +48,14 @@ public class AccountController {
         }
 
         try {
-            return accountService.authorize(accountDto, response, "로그인");
+            String accessToken = accountService.authorize(accountDto, response);
+            LoginResponseBody loginResponseBody =accountService.getCustomResponseBody(accessToken);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+            return new ResponseEntity(loginResponseBody, httpHeaders, HttpStatus.OK);
         } catch (BadCredentialsException e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body(EntityModel.of(new LoginResponseBody(e.getMessage())));
+            return ResponseEntity.badRequest().body(EntityModel.of(e.getMessage()));
         }
     }
 
@@ -65,14 +71,40 @@ public class AccountController {
         try {
             accountDto.setRoles(Set.of(AccountRole.USER));
             accountService.saveAccount(accountDto);
-            return accountService.authorize(accountDto, response, "회원가입");
+            String accessToken = accountService.authorize(accountDto, response);
+            LoginResponseBody loginResponseBody =accountService.getCustomResponseBody(accessToken);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+            return new ResponseEntity(loginResponseBody, httpHeaders, HttpStatus.OK);
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(EntityModel.of(new LoginResponseBody(e.getMessage())));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Check Username or password");
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body(EntityModel.of(e.getMessage()));
         }
 
     }
 
-    @PostMapping("/logout")
+
+    @GetMapping("/refreshtoken")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity refreshToken(
+            @CookieValue(value = "refreshToken", required=false, defaultValue = "empty") String refreshToken,
+            HttpServletRequest request,
+            @CurrentUser Account account){
+        try {
+            String accessToken = accountService.reIssue(refreshToken);
+            LoginResponseBody loginResponseBody =accountService.getCustomResponseBody(accessToken);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+            return new ResponseEntity(loginResponseBody, httpHeaders, HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(EntityModel.of(e.getMessage()));
+        }
+    }
+
+
+
+    @GetMapping("/logout")
     public ResponseEntity logoutUser(
             HttpServletRequest request,
             @CurrentUser Account account) {

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,16 +73,22 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
         String nickName = ((AccountAdapter)(authentication.getPrincipal())).getAccount().getNickname();
 
         //접속가능시간, 갱신가능시간세팅
-        long now =  (new Date()).getTime();
-        Date validity = tokenType == TokenType.ACCESS_TOKEN ?
-                new Date(now + this.accessTokenValidityTime)
-                : new Date(now + this.refreshTokenValidityTime);
 
         Map<String, Object> payLoad = new HashMap<>();
 
-        payLoad.put("username", authentication.getName());
-        payLoad.put(AUTHORITIES_KEY, authorities);
-        payLoad.put("nickname", nickName==null ? "ANONYMOUS" : nickName);
+
+        long now =  (new Date()).getTime();
+        Date validity = null;
+        if(tokenType ==TokenType.ACCESS_TOKEN){
+            validity = new Date(now + this.accessTokenValidityTime);
+            payLoad.put("username", authentication.getName());
+            payLoad.put(AUTHORITIES_KEY, authorities);
+            payLoad.put("nickname", nickName==null ? "ANONYMOUS" : nickName);
+
+        }else{
+            validity = new Date(now + this.refreshTokenValidityTime);
+            payLoad.put("type","refreshToken");
+        }
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
@@ -91,13 +98,6 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
                 .setExpiration(validity)
                 .compact()
                 ;
-    }
-
-    @Override
-    public String refreshAccessToken(HttpServletRequest request) {
-
-
-        return null;
     }
 
     @Override
@@ -121,13 +121,18 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
     }
 
     @Override
-    public boolean validateRefreshToken(HttpServletRequest request) {
-
-        return false;
+    public boolean validateRefreshToken(String refreshToken) {
+        try {
+            Date now = new Date();
+            Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken).getBody().getExpiration();
+            return now.before(expiration);
+        }catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e){
+            throw new InvalidParameterException("유효하지 않은 토큰입니다.");
+        }
     }
 
     @Override
-    public void destroyTokens(HttpServletRequest request) {
+    public void destroyRefreshTokens(HttpServletRequest request) {
 
     }
 
@@ -151,11 +156,11 @@ public class TokenManagerImpl implements TokenManager, InitializingBean {
     }
 
     @Override
-    public Claims getClaims(String accessToken) {
+    public Claims getClaims(String token) {
       return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(accessToken)
+                .parseClaimsJws(token)
                 .getBody();
     }
 

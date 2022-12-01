@@ -7,10 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface TokenManager {
     String createToken(Authentication authentication, TokenType tokenType);
-    String refreshAccessToken(HttpServletRequest request);
     boolean validateToken(String token);
-    boolean validateRefreshToken(HttpServletRequest request);
-    void destroyTokens(HttpServletRequest request);
+    boolean validateRefreshToken(String refreshToken);
+    void destroyRefreshTokens(HttpServletRequest request);
     Authentication getAuthentication(String token);
 
     Claims getClaims(String accessToken);
@@ -18,4 +17,6 @@ public interface TokenManager {
     String resolveToken(HttpServletRequest req);
 
     String getNickname(String accessToken);
+
+    String getUsername(String accessToken);
 }

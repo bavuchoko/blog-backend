@@ -16,7 +16,7 @@ public class CookieUtil {
 
     public Cookie createCookie(String cookieName, String value){
         Cookie token = new Cookie(cookieName,value);
-        token.setHttpOnly(true);
+//        token.setHttpOnly(true);
         token.setSecure(true);
         token.setMaxAge((int)sevenDays);
         token.setPath("/");
