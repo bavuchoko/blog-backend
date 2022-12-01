@@ -1,4 +1,4 @@
-package com.pjs.blog.accounts.entity;
+package com.pjs.blog.commons.accounts.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;

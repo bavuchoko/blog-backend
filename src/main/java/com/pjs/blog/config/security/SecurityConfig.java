@@ -1,6 +1,6 @@
 package com.pjs.blog.config.security;
 
-import com.pjs.blog.accounts.service.impl.AccountServiceImpl;
+import com.pjs.blog.commons.accounts.service.AccountServiceImpl;
 
 import com.pjs.blog.config.redis.RedisUtil;
 import com.pjs.blog.config.security.jjwt.JwtSecurityConfig;

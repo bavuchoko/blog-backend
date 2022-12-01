@@ -1,7 +1,7 @@
-package com.pjs.blog.accounts.dto;
+package com.pjs.blog.commons.accounts.dto;
 
-import com.pjs.blog.accounts.entity.Account;
-import com.pjs.blog.accounts.entity.AccountRole;
+import com.pjs.blog.commons.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.entity.AccountRole;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -19,7 +19,7 @@ import java.util.Set;
 public class AccountDto {
     private static ModelMapper modelMapper = new ModelMapper();
 
-    private Integer di;
+    private Integer id;
 
     @NotBlank(message = "아이디는 필수값 입니다.")
     @Email(message = "아이디는 이메일 형식이어야 합니다.")

@@ -1,8 +1,7 @@
 package com.pjs.blog.config.security.jjwt;
 
-import com.pjs.blog.accounts.AccountAdapter;
-import com.pjs.blog.accounts.entity.Account;
-import com.pjs.blog.accounts.repository.AccountJapRepository;
+import com.pjs.blog.commons.accounts.AccountAdapter;
+import com.pjs.blog.commons.accounts.repository.AccountJapRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

@@ -1,11 +1,11 @@
-package com.pjs.blog.accounts.web;
+package com.pjs.blog.commons.accounts.web;
 
-import com.pjs.blog.accounts.CurrentUser;
-import com.pjs.blog.accounts.dto.AccountDto;
-import com.pjs.blog.accounts.dto.LoginResponseBody;
-import com.pjs.blog.accounts.entity.Account;
-import com.pjs.blog.accounts.entity.AccountRole;
-import com.pjs.blog.accounts.service.impl.AccountServiceImpl;
+import com.pjs.blog.commons.accounts.CurrentUser;
+import com.pjs.blog.commons.accounts.dto.AccountDto;
+import com.pjs.blog.commons.accounts.dto.LoginResponseBody;
+import com.pjs.blog.commons.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.entity.AccountRole;
+import com.pjs.blog.commons.accounts.service.AccountServiceImpl;
 import com.pjs.blog.config.security.jjwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,12 +84,10 @@ public class AccountController {
     }
 
 
-    @GetMapping("/refreshtoken")
+    @GetMapping("/reIssue")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity refreshToken(
-            @CookieValue(value = "refreshToken", required=false, defaultValue = "empty") String refreshToken,
-            HttpServletRequest request,
-            @CurrentUser Account account){
+            @CookieValue(value = "refreshToken", required=false, defaultValue = "empty") String refreshToken){
         try {
             String accessToken = accountService.reIssue(refreshToken);
             LoginResponseBody loginResponseBody =accountService.getCustomResponseBody(accessToken);

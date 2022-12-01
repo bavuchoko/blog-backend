@@ -1,17 +1,16 @@
-package com.pjs.blog.accounts.service.impl;
+package com.pjs.blog.commons.accounts.service;
 
-import com.pjs.blog.accounts.AccountAdapter;
-import com.pjs.blog.accounts.dto.AccountDto;
-import com.pjs.blog.accounts.dto.LoginResponseBody;
-import com.pjs.blog.accounts.entity.Account;
-import com.pjs.blog.accounts.repository.AccountJapRepository;
-import com.pjs.blog.accounts.service.AccountService;
-import com.pjs.blog.accounts.web.AccountController;
+import com.pjs.blog.commons.accounts.AccountAdapter;
+import com.pjs.blog.commons.accounts.dto.AccountDto;
+import com.pjs.blog.commons.accounts.dto.LoginResponseBody;
+import com.pjs.blog.commons.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.repository.AccountJapRepository;
+import com.pjs.blog.commons.accounts.service.AccountService;
+import com.pjs.blog.commons.accounts.web.AccountController;
 import com.pjs.blog.config.cookie.CookieUtil;
 import com.pjs.blog.config.redis.RedisUtil;
 import com.pjs.blog.config.security.jjwt.TokenManager;
 import com.pjs.blog.config.security.jjwt.TokenType;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

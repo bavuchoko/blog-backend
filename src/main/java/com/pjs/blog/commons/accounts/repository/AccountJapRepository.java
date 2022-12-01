@@ -1,7 +1,7 @@
-package com.pjs.blog.accounts.repository;
+package com.pjs.blog.commons.accounts.repository;
 
 
-import com.pjs.blog.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

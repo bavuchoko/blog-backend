@@ -1,11 +1,9 @@
-package com.pjs.blog.accounts.service;
+package com.pjs.blog.commons.accounts.service;
 
-import com.pjs.blog.accounts.dto.AccountDto;
-import com.pjs.blog.accounts.dto.LoginResponseBody;
-import com.pjs.blog.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.dto.AccountDto;
+import com.pjs.blog.commons.accounts.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

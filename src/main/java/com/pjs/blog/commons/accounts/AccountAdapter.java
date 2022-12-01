@@ -1,7 +1,7 @@
-package com.pjs.blog.accounts;
+package com.pjs.blog.commons.accounts;
 
-import com.pjs.blog.accounts.entity.Account;
-import com.pjs.blog.accounts.entity.AccountRole;
+import com.pjs.blog.commons.accounts.entity.Account;
+import com.pjs.blog.commons.accounts.entity.AccountRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

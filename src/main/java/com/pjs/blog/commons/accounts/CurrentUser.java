@@ -1,4 +1,4 @@
-package com.pjs.blog.accounts;
+package com.pjs.blog.commons.accounts;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 

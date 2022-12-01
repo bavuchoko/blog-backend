@@ -1,4 +1,4 @@
-package com.pjs.blog.coomons.serializers;
+package com.pjs.blog.commons.serializers;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;

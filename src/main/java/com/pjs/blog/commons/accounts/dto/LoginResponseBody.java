@@ -1,4 +1,4 @@
-package com.pjs.blog.accounts.dto;
+package com.pjs.blog.commons.accounts.dto;
 
 import lombok.*;
 
