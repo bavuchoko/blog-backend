@@ -69,7 +69,8 @@ public class AccountController {
             return accountService.badRequest(errors);
         }
         try {
-            accountDto.setRoles(Set.of(AccountRole.USER));
+
+            accountDto.setRoles(Set.of(AccountRole.USER, AccountRole.PUBLIC));
             accountService.saveAccount(accountDto);
             String accessToken = accountService.authorize(accountDto, response);
             LoginResponseBody loginResponseBody =accountService.getCustomResponseBody(accessToken);
@@ -128,4 +129,18 @@ public class AccountController {
         pageResources.add(Link.of("/docs/index/html").withRel("profile"));
         return ResponseEntity.ok().body(pageResources);
     }
+
+
+    //프론트에서 문자열 타입으로 넘어오는 유저 데이터의 각 타입별 변수가 컨트롤러에 어떤 타입으로 매칭되는지 보기 위한 컨트롤러
+    @PostMapping("/userDate")
+    public void userDate(
+            @Valid @RequestBody AccountDto accountDto,
+            Errors errors,
+            HttpServletResponse response) {
+
+
+        accountDto.getPassword();
+    }
+
+
 }
